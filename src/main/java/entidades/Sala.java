@@ -53,7 +53,7 @@ public class Sala {
             if (!(funcionNueva.getHoraFin().isBefore(funcionExistente.getHoraInicio())
                     || funcionNueva.getHoraInicio().isAfter(funcionExistente.getHoraFin()))
             ) {
-                System.out.println("La función se traslapa en el horario que desea insertar.");
+                System.out.println("La función se traslapa en el horario que desea insertar con otra.");
                 return false;
             }
         }
