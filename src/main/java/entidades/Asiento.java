@@ -1,27 +1,17 @@
 package entidades;
 
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-public class Asiento extends ReentrantReadWriteLock {
+public class Asiento{
     private boolean ocupado;
-    private boolean reservadoTemp;
+    private String idTransaccion;
 
     public Asiento() {
         this.ocupado = false;
-        this.reservadoTemp = false;
+        this.idTransaccion = null;
     }
 
-    public synchronized boolean isOcupado() {
-        return ocupado;
-    }
-
-    public synchronized boolean isReservadoTemp() {
-        return reservadoTemp;
-    }
-
-    public synchronized boolean reservarTemporalmente() {
-        if (!ocupado && !reservadoTemp) {
-            reservadoTemp = true;
+    public synchronized boolean reservarTemporalmente(String idTransaccion) {
+        if (!ocupado && this.idTransaccion == null) {
+            this.idTransaccion = idTransaccion;
             return true;
         }
         return false;
@@ -29,16 +19,23 @@ public class Asiento extends ReentrantReadWriteLock {
 
     // commit
     public synchronized void commitCompra() {
-        if (reservadoTemp) {
+        if (idTransaccion != null) {
             ocupado = true;
-            reservadoTemp = false;
+            idTransaccion = null;
         }
     }
 
     // rollback
     public synchronized void rollbackReserva() {
-        if (reservadoTemp) {
-            reservadoTemp = false;
-        }
+        idTransaccion = null;
     }
+
+    public synchronized boolean isOcupado() {
+        return ocupado;
+    }
+
+    public synchronized String getIdTransaccion() {
+        return idTransaccion;
+    }
+
 }
