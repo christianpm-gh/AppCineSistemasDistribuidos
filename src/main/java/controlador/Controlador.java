@@ -1,12 +1,12 @@
 package controlador;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import entidades.Funcion;
+import entidades.Pelicula;
+import entidades.Sala;
+
+import java.util.*;
 
 public class Controlador {
-
-    public Controlador() { }
 
     public int verificarListaAsientos(List<String> posicionesAsientos){
         Set<String> posicionesSinDuplicados = new HashSet<>();
@@ -30,5 +30,43 @@ public class Controlador {
             }
         }
         return 0;
+    }
+
+    public static String generarIdTransaccion() {
+        return UUID.randomUUID().toString();
+    }
+
+    public static void inicializarSala(Sala sala){
+        HashMap<String, Pelicula> cartelera = new HashMap<>();
+        agregarPeliculas(cartelera);
+        sala.insertarFuncion(
+                new Funcion("18:00", cartelera.get("Origen"))
+        );
+        sala.insertarFuncion(
+                new Funcion("22:00", cartelera.get("Interestelar"))
+        );
+        sala.insertarFuncion(
+                new Funcion("12:00", cartelera.get("Piratas de Silicon Valley"))
+        );
+        sala.insertarFuncion(
+                new Funcion("08:00", cartelera.get("Código Enigma"))
+        );
+        sala.insertarFuncion(
+                new Funcion("14:00", cartelera.get("Red Social"))
+        );
+    }
+
+    private static void agregarPeliculas(HashMap<String, Pelicula> cartelera) {
+        cartelera.put("Interestelar", new Pelicula("Interestelar", 169, "Ciencia ficción", "Inglés"));
+        cartelera.put("Código Enigma", new Pelicula("Código Enigma", 113, "Drama histórico", "Inglés"));
+        cartelera.put("Piratas de Silicon Valley", new Pelicula("Piratas de Silicon Valley", 95, "Drama biográfico", "Inglés"));
+        cartelera.put("Red Social", new Pelicula("Red Social", 120, "Drama", "Inglés"));
+        cartelera.put("Origen", new Pelicula("Origen", 148, "Ciencia ficción", "Inglés"));
+    }
+
+    public static Sala instanciarSala1(){
+        Sala sala1 = new Sala(1, "IMAX");
+        inicializarSala(sala1);
+        return sala1;
     }
 }

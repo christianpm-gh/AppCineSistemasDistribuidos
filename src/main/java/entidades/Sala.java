@@ -1,5 +1,7 @@
 package entidades;
 
+import controlador.Controlador;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
@@ -60,5 +62,4 @@ public class Sala {
         // Agregar la función si no hay conflictos
         return funciones.add(funcionNueva);
     }
-
 }
