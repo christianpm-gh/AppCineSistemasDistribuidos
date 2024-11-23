@@ -2,42 +2,58 @@ package entidades;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 public class Sala {
-    int numeroSala;
-    String tipoPantalla;
-    List<Funcion> funciones;
+    private int numeroSala;
+    private String tipoPantalla;
+    private TreeSet<Funcion> funciones;
 
     public Sala(int numeroSala, String tipoPantalla) {
+        if (numeroSala < 0)
+            throw new IllegalArgumentException("El numero de sala no debe ser un valor negativo.");
+        else if (tipoPantalla == null || tipoPantalla.isEmpty())
+            throw new IllegalArgumentException("El tipo de pantalla no debe ser nulo o vacío.");
+        this.numeroSala = numeroSala;
         this.numeroSala = numeroSala;
         this.tipoPantalla = tipoPantalla;
-        this.funciones = new ArrayList<>();
+        /*
+         * Almacenamos las funciones en un TreeSet para mantenerlas ordenadas por hora
+         * de inicio, la cuestión del traslape ya esta manejada en el metodo insertarFuncion
+         * el comparador del TreeSet se encarga de esto.
+         */
+        this.funciones = new TreeSet<>((f1, f2) -> f1.getHoraInicio().compareTo(f2.getHoraInicio()));
     }
 
     public int getNumeroSala() {
-        return numeroSala;
+        return this.numeroSala;
     }
 
     public String getTipoPantalla() {
-        return tipoPantalla;
+        return this.tipoPantalla;
     }
 
     public List<Funcion> getFunciones() {
-        return funciones;
+        if (this.funciones.isEmpty()) {
+            System.out.println("No hay funciones en la sala " + numeroSala);
+            return null;
+        }
+        return new ArrayList<>(this.funciones);
     }
 
     public boolean insertarFuncion(Funcion funcionNueva) {
+        if (funcionNueva == null) {
+            throw new IllegalArgumentException(
+                    "La función que estas tratando de insertar es nula."
+            );
+        }
+
         for (Funcion funcionExistente : funciones) {
-            // Validar si la función ya existe (por ID)
-            if (funcionExistente.getIdFuncion() == funcionNueva.getIdFuncion()) {
-                System.out.println("La función ya existe");
-                return false;
-            }
-            // Validar si las funciones se traslapan
+            // Validamos si la nueva funcion se traslapa con alguna ya existente en la sala
             if (!(funcionNueva.getHoraFin().isBefore(funcionExistente.getHoraInicio())
                     || funcionNueva.getHoraInicio().isAfter(funcionExistente.getHoraFin()))
             ) {
-                System.out.println("La función se traslapa con otra función");
+                System.out.println("La función se traslapa en el horario que desea insertar.");
                 return false;
             }
         }

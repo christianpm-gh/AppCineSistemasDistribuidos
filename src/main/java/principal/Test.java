@@ -6,7 +6,7 @@ import entidades.Sala;
 
 import java.util.HashMap;
 
-public class Main {
+public class Test {
     public static void main(String[] args) {
 
         /*
@@ -23,7 +23,27 @@ public class Main {
         /*
         * Agregamos funciones a la sala
         */
-        sala1.insertarFuncion(new Funcion(1, "06:00", peliculasDisponibles.get("Interestelar")));
+
+        // Testeamos los límites de la hora de inicio de una funcion
+
+        // Agregamos 3 funciones a la sala
+        sala1.insertarFuncion(
+                new Funcion("22:00", peliculasDisponibles.get("Interestelar"))
+        );
+       sala1.insertarFuncion(
+                new Funcion("12:00", peliculasDisponibles.get("Interestelar"))
+        );
+       sala1.insertarFuncion(
+                new Funcion("08:00", peliculasDisponibles.get("Código Enigma"))
+        );
+
+       // Impresión de las funciones de la sala
+        for (Funcion f : sala1.getFunciones()){
+            System.out.println(f);
+        }
+
+        // Testeamos si hay traslape de una pelicula
+
     }
 
     static void agregarPeliculas(HashMap<String, Pelicula> peliculasDispobibles) {

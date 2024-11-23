@@ -12,19 +12,23 @@ import java.util.Set;
  */
 
 public class Funcion {
-    private int idFuncion;
     private LocalTime horaInicio;
     private LocalTime horaFin;
     private Pelicula pelicula;
     private final Asiento[][] asientos;
     private final int MAX_FILAS = 10;
     private final int MAX_COLUMNAS = 10;
+    private static final LocalTime HORA_MINIMA = LocalTime.of(7, 0);
+    private static final LocalTime HORA_MAXIMA = LocalTime.of(23, 0);
+    private static final LocalTime HORA_LIMITE_FIN = LocalTime.of(1, 0); // 1:00 AM
+    private static final LocalTime HORA_LIMITE_FIX = LocalTime.of(7, 0); // 7:00 AM
 
 
-    public Funcion(int idFuncion, String horaInicioStr, Pelicula pelicula) {
-        this.idFuncion = idFuncion;
+
+    public Funcion(String horaInicioStr, Pelicula pelicula) {
         this.horaInicio = LocalTime.parse(horaInicioStr);
-        calcularHoraFin(horaInicio, pelicula.duracion());
+        verificarHoraInicio();
+        calcularHoraFin(pelicula.duracion());
         this.pelicula = pelicula;
         this.asientos = new Asiento[MAX_FILAS][MAX_COLUMNAS];
         for (int i = 0; i < 10; i++) {
@@ -32,10 +36,6 @@ public class Funcion {
                 asientos[i][j] = new Asiento();
             }
         }
-    }
-
-    public int getIdFuncion() {
-        return idFuncion;
     }
 
     public LocalTime getHoraInicio() {
@@ -46,31 +46,36 @@ public class Funcion {
         return horaFin;
     }
 
-    private void calcularHoraFin(LocalTime horaInicio, int duracion) {
+    private void verificarHoraInicio() {
         if (horaInicio == null) {
-            throw new IllegalArgumentException("Necesita especificar una hora de inicio.");
+            throw new IllegalArgumentException("Debe especificar una hora de inicio.");
+        }
+        if (horaInicio.isBefore(HORA_MINIMA) || horaInicio.isAfter(HORA_MAXIMA)) {
+            throw new IllegalArgumentException(
+                    "La hora de inicio debe estar entre las " + HORA_MINIMA + " y las " + HORA_MAXIMA + "."
+            );
+        }
+    }
+
+    private void calcularHoraFin(int duracion) {
+        if (horaInicio == null) {
+            throw new IllegalArgumentException("Debe especificar una hora de inicio antes de calcular la hora de fin.");
         }
         if (duracion <= 0) {
-            throw new IllegalArgumentException(
-                    "La duración de la película debe ser un valor entero positivo."
-            );
+            throw new IllegalArgumentException("La duración de la película debe ser un valor entero positivo.");
         }
 
-        LocalTime horaFin = horaInicio.plusMinutes(duracion);
+        // Calcular hora de fin
+        LocalTime horaFinCalculada = horaInicio.plusMinutes(duracion);
 
-        /*
-        * Validamos que la hora de fin de una pelicula no sea despues de la 1:00 AM
-        * y antes de las 7:00 AM, los metodos isAfter y isBefore son metodos no inclusivos
-        * */
-        LocalTime horaLimite = LocalTime.of(1, 0); // 1:00 AM
-        LocalTime horaLimiteFix = LocalTime.of(7, 0); // 6:00 AM
-        if (horaFin.isAfter(horaLimite) && horaFin.isBefore(horaLimiteFix)) {
+        // Validar rango de fin
+        if (horaFinCalculada.isAfter(HORA_LIMITE_FIN) && horaFinCalculada.isBefore(HORA_LIMITE_FIX)) {
             throw new IllegalArgumentException(
-                    "El horario máximo permitido para terminar una función es a la 1:00 AM."
-            );
+                    "La hora de fin no puede ser después de " + HORA_LIMITE_FIN);
         }
 
-        this.horaFin = horaFin;
+        // Asignar hora de fin
+        this.horaFin = horaFinCalculada;
     }
 
     public Pelicula getPelicula() {
@@ -137,5 +142,14 @@ public class Funcion {
             }
         }
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Funcion{" +
+                "horaInicio=" + horaInicio +
+                ", horaFin=" + horaFin +
+                ", pelicula=" + pelicula.titulo() +
+                '}';
     }
 }
