@@ -23,7 +23,7 @@ public class Main {
         /*
         * Agregamos funciones a la sala
         */
-        sala1.insertarFuncion(new Funcion(1, "07:00", peliculasDispobibles.get("Interestelar")));
+        sala1.insertarFuncion(new Funcion(1, "06:00", peliculasDisponibles.get("Interestelar")));
     }
 
     static void agregarPeliculas(HashMap<String, Pelicula> peliculasDispobibles) {

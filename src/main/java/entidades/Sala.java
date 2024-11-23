@@ -35,7 +35,8 @@ public class Sala {
             }
             // Validar si las funciones se traslapan
             if (!(funcionNueva.getHoraFin().isBefore(funcionExistente.getHoraInicio())
-                    || funcionNueva.getHoraInicio().isAfter(funcionExistente.getHoraFin()))) {
+                    || funcionNueva.getHoraInicio().isAfter(funcionExistente.getHoraFin()))
+            ) {
                 System.out.println("La función se traslapa con otra función");
                 return false;
             }

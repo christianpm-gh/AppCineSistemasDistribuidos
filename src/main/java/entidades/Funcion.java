@@ -21,9 +21,9 @@ public class Funcion {
     private final int MAX_COLUMNAS = 10;
 
 
-    public Funcion(int idFuncion, LocalTime horaInicio, Pelicula pelicula) {
+    public Funcion(int idFuncion, String horaInicioStr, Pelicula pelicula) {
         this.idFuncion = idFuncion;
-        this.horaInicio = horaInicio;
+        this.horaInicio = LocalTime.parse(horaInicioStr);
         calcularHoraFin(horaInicio, pelicula.duracion());
         this.pelicula = pelicula;
         this.asientos = new Asiento[MAX_FILAS][MAX_COLUMNAS];
@@ -58,8 +58,13 @@ public class Funcion {
 
         LocalTime horaFin = horaInicio.plusMinutes(duracion);
 
+        /*
+        * Validamos que la hora de fin de una pelicula no sea despues de la 1:00 AM
+        * y antes de las 7:00 AM, los metodos isAfter y isBefore son metodos no inclusivos
+        * */
         LocalTime horaLimite = LocalTime.of(1, 0); // 1:00 AM
-        if (horaFin.isAfter(horaLimite)) {
+        LocalTime horaLimiteFix = LocalTime.of(7, 0); // 6:00 AM
+        if (horaFin.isAfter(horaLimite) && horaFin.isBefore(horaLimiteFix)) {
             throw new IllegalArgumentException(
                     "El horario máximo permitido para terminar una función es a la 1:00 AM."
             );
