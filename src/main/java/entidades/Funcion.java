@@ -81,6 +81,9 @@ public class Funcion {
         }
     }
 
+
+    // Asiento: desocupuado o ocupado
+    // Asiento: desocupado - apartado - ocupado
     public boolean reservarAsientos(List<String> posiciones, String idTransaccion) {
         lock.writeLock().lock();
         try {
@@ -92,6 +95,7 @@ public class Funcion {
                      */
                     for (String pRollback : posiciones) {
                         Asiento aRollback = asientos.get(pRollback);
+                        // &&
                         if (aRollback != null || aRollback.getIdTransaccion().equals(idTransaccion)) {
                             aRollback.rollbackReserva();
                         }
@@ -130,7 +134,6 @@ public class Funcion {
         } finally {
             lock.writeLock().unlock();
         }
-
     }
 
     public LocalTime getHoraInicio() {

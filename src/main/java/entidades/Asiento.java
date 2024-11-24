@@ -15,6 +15,8 @@ public class Asiento{
         this.idTransaccion = null;
     }
 
+
+    // estado suceo
     public synchronized boolean reservarTemporalmente(String idTransaccion) {
         if (!ocupado && this.idTransaccion == null) {
             this.idTransaccion = idTransaccion;

@@ -19,6 +19,7 @@ public class Servidor {
     private static int contadorClientes = 0; //
     private static String idTransaccion;// Contador para identificar clientes conectados
     private static final ExecutorService poolHilos = Executors.newFixedThreadPool(10);
+    // TODO depende de este coso
     public static Sala sala1 = Controlador.instanciarSala1();
 
     public static void main(String[] args) {

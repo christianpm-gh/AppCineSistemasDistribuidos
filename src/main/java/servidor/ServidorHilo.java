@@ -27,8 +27,8 @@ public class ServidorHilo extends Thread {
    @Override
     public void run() {
         try (DataInputStream in = new DataInputStream(socket.getInputStream());
-             DataOutputStream out = new DataOutputStream(socket.getOutputStream())) {
-
+             DataOutputStream out = new DataOutputStream(socket.getOutputStream()))
+        {
             boolean asientosReservados;// Bandera para controlar la reserva de asientos
             int eleccionFuncion;// Elección de la función por parte del cliente
             int cantidadAsientosPorReservar;// Cantidad de asientos a reservar
@@ -51,6 +51,9 @@ public class ServidorHilo extends Thread {
                 listaPosicionesAsientos = new ArrayList<>(
                         obtenerListaAsientosPorComprar(in, out, cantidadAsientosPorReservar)
                 );
+
+                // reservar asientos
+                // preguntar si quiere finalizar la compra
 
                 asientosReservados = Servidor.sala1.getFunciones().get(eleccionFuncion - 1).reservarAsientos(
                         listaPosicionesAsientos, idTransaccion);
