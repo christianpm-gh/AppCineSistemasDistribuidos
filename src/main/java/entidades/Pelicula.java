@@ -1,5 +1,9 @@
 package entidades;
 
+/**
+ * @author Christian Morga
+ */
+
 public record Pelicula(String titulo, int duracion, String genero, String idioma) {
     public Pelicula {
         if (duracion <= 0) {

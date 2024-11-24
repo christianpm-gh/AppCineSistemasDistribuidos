@@ -7,6 +7,10 @@ import entidades.Sala;
 
 import java.util.*;
 
+/**
+ * @author Christian Morga
+ */
+
 public class Controlador {
 
     public static final int MAX_FILAS = 5;
@@ -30,8 +34,6 @@ public class Controlador {
         }
         sb.append("\n");
 
-        int contadorAsientosDisponibles = 0;
-
         for (int fila = 1; fila <= MAX_FILAS; fila++) {
             sb.append("F").append(fila).append("  ");
 
@@ -41,7 +43,6 @@ public class Controlador {
 
                 if (asiento != null && !asiento.isOcupado()) {
                     sb.append("D  "); // Disponible
-                    contadorAsientosDisponibles++;
                 } else {
                     sb.append("N  "); // No disponible
                 }
@@ -49,35 +50,20 @@ public class Controlador {
             sb.append("\n");
         }
 
-        sb.append("\nTotal de asientos disponibles: ").append(contadorAsientosDisponibles).append("\n");
+        sb.append("\nTotal de asientos disponibles: ").append(funcionSeleccionada.getCupo()).append("\n");
 
         return sb.toString();
     }
 
-
-
-    public int verificarListaAsientos(List<String> posicionesAsientos){
-        Set<String> posicionesSinDuplicados = new HashSet<>();
+    public static boolean validarFormatoAsiento(String p) {
         String regex = "\\d+-\\d+";
-        for (String posicion : posicionesAsientos) {
-            if (!posicion.matches(regex)) {
-                return 1; // 1 => formato incorrecto
-            }
-
-            String[] fc = posicion.split("-");
-            int fila = Integer.parseInt(fc[0]);
-            int columna = Integer.parseInt(fc[1]);
-            int MAX_FILAS = 10;
-            int MAX_COLUMNAS = 10;
-            if (fila < 0 || fila >= MAX_FILAS || columna < 0 || columna >= MAX_COLUMNAS) {
-                return 2; // 2 => fuera de los límites de las posiciones
-            }
-
-            if (!posicionesSinDuplicados.add(posicion)) {
-                return 3; // 3 => duplicado de asiento encontrado
-            }
+        if (!p.matches(regex)) {
+            return false;
         }
-        return 0;
+        String[] fc = p.split("-");
+        int fila = Integer.parseInt(fc[0]);
+        int columna = Integer.parseInt(fc[1]);
+        return fila >= 0 && fila < MAX_FILAS && columna >= 0 && columna < MAX_COLUMNAS;
     }
 
     public static String generarIdTransaccion() {
@@ -121,6 +107,12 @@ public class Controlador {
     public static boolean validarFuncionElegida(int eleccion, Sala sala){
         int numeroFunciones = sala.getFunciones().size();
         return eleccion > 0 && eleccion <= numeroFunciones;
+    }
+
+    public static boolean validarCantidadAsientos(int cantidadAsientos, Sala sala, int eleccionFuncion) {
+        List<Funcion> funciones = new ArrayList<>(sala.getFunciones());
+        Funcion funcionSeleccionada = funciones.get(eleccionFuncion - 1);
+        return cantidadAsientos > 0 && cantidadAsientos <= funcionSeleccionada.getCupo();
     }
 
 }

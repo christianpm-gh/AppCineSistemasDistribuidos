@@ -1,5 +1,11 @@
 package entidades;
 
+
+/**
+ * @author Christian Morga
+ */
+
+
 public class Asiento{
     private boolean ocupado;
     private String idTransaccion;

@@ -10,10 +10,15 @@ import java.util.HashSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author Christian Morga
+ */
+
 public class Funcion {
     private LocalTime horaInicio;
     private LocalTime horaFin;
     private Pelicula pelicula;
+    private int cupo;
 
     private Map<String, Asiento> asientos;
     private ReentrantReadWriteLock lock; // objeto de bloqueo
@@ -87,7 +92,7 @@ public class Funcion {
                      */
                     for (String pRollback : posiciones) {
                         Asiento aRollback = asientos.get(pRollback);
-                        if (aRollback != null && aRollback.getIdTransaccion().equals(idTransaccion)) {
+                        if (aRollback != null || aRollback.getIdTransaccion().equals(idTransaccion)) {
                             aRollback.rollbackReserva();
                         }
                     }
@@ -95,6 +100,19 @@ public class Funcion {
                 }
             }
             return true;
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public void cancelarReserva(String idTransaccion) {
+        lock.writeLock().lock();
+        try {
+            for (Asiento a : asientos.values()) {
+                if (idTransaccion.equals(a.getIdTransaccion())) {
+                    a.rollbackReserva();
+                }
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -115,19 +133,6 @@ public class Funcion {
 
     }
 
-    public void cancelarReserva(String idTransaccion) {
-        lock.writeLock().lock();
-        try {
-            for (Asiento a : asientos.values()) {
-                if (idTransaccion.equals(a.getIdTransaccion())) {
-                    a.rollbackReserva();
-                }
-            }
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
     public LocalTime getHoraInicio() {
         return horaInicio;
     }
@@ -142,6 +147,16 @@ public class Funcion {
 
     public Map<String, Asiento> getAsientos() {
         return asientos;
+    }
+
+    public int getCupo() {
+        int auxCupo = 0;
+        for (Asiento a : asientos.values()) {
+            if (a != null && !a.isOcupado()) {
+                auxCupo++;
+            }
+        }
+        return auxCupo;
     }
 
     @Override
