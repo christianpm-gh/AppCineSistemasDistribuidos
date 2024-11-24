@@ -1,5 +1,7 @@
 package entidades;
 
+import controlador.Controlador;
+
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -12,11 +14,12 @@ public class Funcion {
     private LocalTime horaInicio;
     private LocalTime horaFin;
     private Pelicula pelicula;
+
     private Map<String, Asiento> asientos;
     private ReentrantReadWriteLock lock; // objeto de bloqueo
 
-    private final int MAX_FILAS = 10;
-    private final int MAX_COLUMNAS = 10;
+    private final int MAX_FILAS = Controlador.MAX_FILAS;
+    private final int MAX_COLUMNAS = Controlador.MAX_COLUMNAS;
     private static final LocalTime HORA_MINIMA = LocalTime.of(7, 0);
     private static final LocalTime HORA_MAXIMA = LocalTime.of(23, 0);
     private static final LocalTime HORA_LIMITE_FIN = LocalTime.of(1, 0); // 1:00 AM
@@ -135,6 +138,10 @@ public class Funcion {
 
     public Pelicula getPelicula() {
         return pelicula;
+    }
+
+    public Map<String, Asiento> getAsientos() {
+        return asientos;
     }
 
     @Override

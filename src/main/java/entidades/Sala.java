@@ -43,6 +43,22 @@ public class Sala {
         return new ArrayList<>(this.funciones);
     }
 
+    public String listarFunciones() {
+        StringBuilder sb = new StringBuilder();
+        int contadorFuncion = 1;
+        for (Funcion funcion : funciones) {
+            sb.append(contadorFuncion++);
+            sb.append(". ");
+            sb.append(funcion.getPelicula().titulo());
+            sb.append(" - Hora de Inicio: ");
+            sb.append(funcion.getHoraInicio());
+            sb.append("hrs - Duracion: ");
+            sb.append(funcion.getPelicula().duracion());
+            sb.append(" minutos\n");
+        }
+        return sb.toString();
+    }
+
     public boolean insertarFuncion(Funcion funcionNueva) {
         if (funcionNueva == null) {
             throw new IllegalArgumentException(

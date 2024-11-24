@@ -1,5 +1,6 @@
 package controlador;
 
+import entidades.Asiento;
 import entidades.Funcion;
 import entidades.Pelicula;
 import entidades.Sala;
@@ -7,6 +8,53 @@ import entidades.Sala;
 import java.util.*;
 
 public class Controlador {
+
+    public static final int MAX_FILAS = 5;
+    public static final int MAX_COLUMNAS = 5;
+
+    public static String mostrarDisposicionAsientos(int eleccionFuncion, Sala sala1) {
+
+        List<Funcion> funciones = new ArrayList<>(sala1.getFunciones());
+        Funcion funcionSeleccionada = funciones.get(eleccionFuncion - 1);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nTitulo: ").append(funcionSeleccionada.getPelicula().titulo()).append(".");
+        sb.append(" Hora de inicio: ").append(funcionSeleccionada.getHoraInicio()).append(" hrs.\n");
+        sb.append("Duración: ").append(funcionSeleccionada.getPelicula().duracion()).append(" minutos.\n");
+        sb.append("Idioma: ").append(funcionSeleccionada.getPelicula().idioma()).append(".\n");
+        sb.append("\nDisposición de asientos para la función seleccionada:\n\n");
+
+        sb.append("    ");
+        for (int columna = 1; columna <= MAX_COLUMNAS; columna++) {
+            sb.append("C").append(columna).append(" ");
+        }
+        sb.append("\n");
+
+        int contadorAsientosDisponibles = 0;
+
+        for (int fila = 1; fila <= MAX_FILAS; fila++) {
+            sb.append("F").append(fila).append("  ");
+
+            for (int columna = 1; columna <= MAX_COLUMNAS; columna++) {
+                String claveAsiento = fila + "-" + columna;
+                Asiento asiento = funcionSeleccionada.getAsientos().get(claveAsiento);
+
+                if (asiento != null && !asiento.isOcupado()) {
+                    sb.append("D  "); // Disponible
+                    contadorAsientosDisponibles++;
+                } else {
+                    sb.append("N  "); // No disponible
+                }
+            }
+            sb.append("\n");
+        }
+
+        sb.append("\nTotal de asientos disponibles: ").append(contadorAsientosDisponibles).append("\n");
+
+        return sb.toString();
+    }
+
+
 
     public int verificarListaAsientos(List<String> posicionesAsientos){
         Set<String> posicionesSinDuplicados = new HashSet<>();
@@ -36,7 +84,7 @@ public class Controlador {
         return UUID.randomUUID().toString();
     }
 
-    public static void inicializarSala(Sala sala){
+    private static void inicializarSala(Sala sala){
         HashMap<String, Pelicula> cartelera = new HashMap<>();
         agregarPeliculas(cartelera);
         sala.insertarFuncion(
@@ -69,4 +117,10 @@ public class Controlador {
         inicializarSala(sala1);
         return sala1;
     }
+
+    public static boolean validarFuncionElegida(int eleccion, Sala sala){
+        int numeroFunciones = sala.getFunciones().size();
+        return eleccion > 0 && eleccion <= numeroFunciones;
+    }
+
 }

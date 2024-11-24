@@ -1,5 +1,6 @@
 package principal;
 
+import controlador.Controlador;
 import entidades.Funcion;
 import entidades.Pelicula;
 import entidades.Sala;
@@ -18,7 +19,8 @@ public class Test {
         /*
         * Crear sala de cine
         */
-        //Sala sala1 = new Sala(1, "IMAX");
+        Sala sala1 = Controlador.instanciarSala1();
+        System.out.println(sala1.listarFunciones());
 
         /*
         * Agregamos funciones a la sala
@@ -38,9 +40,7 @@ public class Test {
         );*/
 
        // Impresión de las funciones de la sala
-        for (Funcion f : Servidor.sala1.getFunciones()){
-            System.out.println(f);
-        }
+
 
         // Testeamos si hay traslape de una pelicula
 
