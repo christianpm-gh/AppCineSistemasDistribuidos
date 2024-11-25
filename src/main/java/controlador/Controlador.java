@@ -63,7 +63,7 @@ public class Controlador {
         String[] fc = p.split("-");
         int fila = Integer.parseInt(fc[0]);
         int columna = Integer.parseInt(fc[1]);
-        return fila >= 0 && fila < MAX_FILAS && columna >= 0 && columna < MAX_COLUMNAS;
+        return fila >= 1 && fila <= MAX_FILAS && columna >= 1 && columna <= MAX_COLUMNAS;
     }
 
     public static String generarIdTransaccion() {

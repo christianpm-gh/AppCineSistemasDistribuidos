@@ -5,6 +5,7 @@ import servidor.Servidor;
 
 import java.io.*;
 import java.net.*;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 /**
@@ -17,6 +18,7 @@ public class Cliente extends Thread {
     private static final int PUERTO = 12345;
 
     public static void main(String[] args) {
+
         try (Socket socket = new Socket(SERVIDOR, PUERTO);
              DataInputStream in = new DataInputStream(socket.getInputStream());
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -30,7 +32,19 @@ public class Cliente extends Thread {
                 System.out.print(in.readUTF());
 
                 // Escribir la elección de la función al servidor
-                int eleccionFuncion = scanner.nextInt();
+                int eleccionFuncion;
+                try{
+                    eleccionFuncion = scanner.nextInt();
+                }catch(InputMismatchException e){
+                    while (true) {
+                        System.out.print("\nPor favor, introduce un dato numerico: ");
+                        scanner.next();
+                        if(scanner.hasNextInt()){
+                            eleccionFuncion = scanner.nextInt();
+                            break;
+                        }
+                    }
+                }
                 out.writeInt(eleccionFuncion);
                 while (in.readUTF().contains("invalida")) {
                     System.out.print("\nPor favor, selecciona una función válida: ");
@@ -44,7 +58,19 @@ public class Cliente extends Thread {
 
                 // Intercambio de mensajes sobre la cantidad de asientos a comprar
                 System.out.print(in.readUTF());
-                int cantidadAsientosPorReservar = scanner.nextInt();
+                int cantidadAsientosPorReservar;
+                try{
+                    cantidadAsientosPorReservar = scanner.nextInt();
+                }catch(InputMismatchException e){
+                    while (true) {
+                        System.out.print("\nPor favor, introduce un dato numerico: ");
+                        scanner.next();
+                        if(scanner.hasNextInt()){
+                            cantidadAsientosPorReservar = scanner.nextInt();
+                            break;
+                        }
+                    }
+                }
                 out.writeInt(cantidadAsientosPorReservar);
                 while (in.readUTF().contains("invalida")) {
                     System.out.print("\nPor favor, ingresa una cantidad válida de asientos: ");
@@ -66,6 +92,8 @@ public class Cliente extends Thread {
                     }
                     out.writeUTF(p);
                 }
+
+                // Leer la confirmación de la compra (aceptada o rechazada)
                 confirmacionCompra = in.readUTF();
                 if (confirmacionCompra.contains("Lo sentimos")) {
                     System.out.println(confirmacionCompra);
