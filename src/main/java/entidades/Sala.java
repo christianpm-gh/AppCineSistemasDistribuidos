@@ -2,11 +2,13 @@ package entidades;
 
 import controlador.Controlador;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
-public class Sala {
+public class Sala implements Serializable{
     private int numeroSala;
     private String tipoPantalla;
     private TreeSet<Funcion> funciones;
@@ -24,7 +26,17 @@ public class Sala {
          * de inicio, la cuestión del traslape ya esta manejada en el metodo insertarFuncion
          * el comparador del TreeSet se encarga de esto.
          */
-        this.funciones = new TreeSet<>((f1, f2) -> f1.getHoraInicio().compareTo(f2.getHoraInicio()));
+        this.funciones = new TreeSet<>((Comparator) new FuncionComparator());
+    }
+
+    // Clase interna para comparar funciones por hora de inicio
+    private static class FuncionComparator implements Serializable, Comparator<Funcion> {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public int compare(Funcion f1, Funcion f2) {
+            return f1.getHoraInicio().compareTo(f2.getHoraInicio());
+        }
     }
 
     public int getNumeroSala() {

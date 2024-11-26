@@ -1,71 +1,67 @@
-package servidor;
+package respaldo;
 
 import controlador.Controlador;
 import entidades.Transaccion;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
 
 /**
- * @author Christian Morga
+ *
+ * @author skullkidms
  */
-
-public class ServidorHilo extends Thread {
+public class ServidorHiloR extends Thread {
     private final Socket socket;
     private final Transaccion transaccion;
-    private Socket socketRespaldo;
     private final int contadorClientes;
-    private DataOutputStream outRespaldo;
 
-    public ServidorHilo(Socket socket, Transaccion transaccion, int contadorClientes) {
+
+    public ServidorHiloR(Socket socket, Transaccion transaccion, int contadorClientes) {
         this.socket = socket;
         this.transaccion = transaccion;
         this.contadorClientes = contadorClientes;
 
-        try {
-            this.socketRespaldo = new Socket("localhost", 12349);
-            this.outRespaldo = new DataOutputStream(socketRespaldo.getOutputStream());
-        } catch (IOException e) {
-            System.err.println("Error al conectar con el servidor de replicas: " + e.getMessage());
-        }
     }
 
-   @Override
+    @Override
     public void run() {
         try (DataInputStream in = new DataInputStream(socket.getInputStream());
-             DataOutputStream out = new DataOutputStream(socket.getOutputStream()))
-        {
+             DataOutputStream out = new DataOutputStream(socket.getOutputStream())) {
+
             boolean asientosReservados;// Bandera para controlar la reserva de asientos
             int eleccionFuncion;// Elección de la función por parte del cliente
             int cantidadAsientosPorReservar;// Cantidad de asientos a reservar
             List<String> listaPosicionesAsientos;// Lista de posiciones de asientos a reservar
 
             do {
+
                 // Bienvenida al cliente y solicitar la funcion elegida
-                enviarMensajeBienvenidaFuncion(out);
-                transaccion.avanzarPaso();
+                if (transaccion.getPasoActual() == 0) {
+                    enviarMensajeBienvenidaFuncion(out);
+                    transaccion.avanzarPaso();
+                }
 
                 // Leer la elección de la función del cliente y validarla
                 eleccionFuncion = procesarEleccionFuncion(in, out);
-                transaccion.setFuncion(eleccionFuncion);
-                replicarTransaccion(transaccion.toString());
                 transaccion.avanzarPaso();
 
-                // Enviar al cliente informacion y disposicion de asientos de la funcion elegida
-                out.writeUTF(Controlador.mostrarDisposicionAsientos(eleccionFuncion, Servidor.sala1));
-
+                // Enviar al cliente información y disposicion de asientos de la funcion elegida
+                out.writeUTF(Controlador.mostrarDisposicionAsientos(eleccionFuncion, ServidorR.sala1));
                 // Solicitar al cliente la cantidad de asientos a reservar
                 cantidadAsientosPorReservar = procesarCantidadAsientosCompra(in, out, eleccionFuncion);
-                transaccion.setnAsientos(cantidadAsientosPorReservar);
-                replicarTransaccion(transaccion.toString());
                 transaccion.avanzarPaso();
+
 
                 // Solicitar al cliente los asientos a reservar
                 listaPosicionesAsientos = new ArrayList<>(
                         obtenerListaAsientosPorComprar(in, out, cantidadAsientosPorReservar)
                 );
-                asientosReservados = Servidor.sala1.getFunciones().get(eleccionFuncion - 1).reservarAsientos(
+                asientosReservados = ServidorR.sala1.getFunciones().get(eleccionFuncion - 1).reservarAsientos(
                         listaPosicionesAsientos, transaccion.getId());
                 if (!asientosReservados) {
                     out.writeUTF("\n¡Lo sentimos! Alguno de los asientos seleccionados ya está ocupado.\n" +
@@ -75,36 +71,36 @@ public class ServidorHilo extends Thread {
             } while (!asientosReservados);
 
             out.writeUTF("exito");
-            Servidor.sala1.getFunciones().get(eleccionFuncion - 1).confirmarCompra(transaccion.getId());
+            ServidorR.sala1.getFunciones().get(eleccionFuncion - 1).confirmarCompra(transaccion.getId());
             System.out.println("\nCliente " + contadorClientes + " - Compra exitosa de " +
                     cantidadAsientosPorReservar + " asiento(s) de la función " + eleccionFuncion);
-            transaccion.avanzarPaso();
-            replicarTransaccion(transaccion.toString());
             out.writeUTF("\n¡Reserva exitosa! Gracias por tu compra. 😊");
 
         } catch (IOException e) {
             System.out.println("\nError en la conexión con el cliente: " + contadorClientes + " - " + e.getMessage());
         } finally {
-            Servidor.mensajeClienteDesconectado(transaccion.getId(), contadorClientes);
+
+            ServidorR.mensajeClienteDesconectado(transaccion.getId(), contadorClientes);
             try {
                 socket.close();
             } catch (IOException e) {
-                System.out.println("Error al cerrar el socket: " + e.getMessage());
+                System.out.println("Error al cerrar socket: " + e.getMessage());
             }
+
         }
     }
 
     private void enviarMensajeBienvenidaFuncion(DataOutputStream out) throws IOException {
         out.writeUTF("¡Gracias por conectarte alservidor del cine!\n\n" +
                 "Funciones disponibles:\n" +
-                Servidor.sala1.listarFunciones() +
+                ServidorR.sala1.listarFunciones() +
                 "\nPor favor, selecciona una función escribiendo el número correspondiente." +
                 "\nTu elección: ");
     }
 
     private int procesarEleccionFuncion(DataInputStream in, DataOutputStream out) throws IOException {
         int eleccionFuncion;
-        while (!Controlador.validarFuncionElegida(in.readInt(), Servidor.sala1)) {
+        while (!Controlador.validarFuncionElegida(in.readInt(), ServidorR.sala1)) {
             out.writeUTF("invalida");
         }
         out.writeUTF("valida");
@@ -118,7 +114,7 @@ public class ServidorHilo extends Thread {
     {
         out.writeUTF("\nPor favor, ingresa la cantidad de asientos que deseas reservar: ");
         int cantidadAsientosPorReservar;
-        while (!Controlador.validarCantidadAsientos(in.readInt(), Servidor.sala1, eleccionFuncion)) {
+        while (!Controlador.validarCantidadAsientos(in.readInt(), ServidorR.sala1, eleccionFuncion)) {
             out.writeUTF("invalida");
         }
         out.writeUTF("valida");
@@ -128,9 +124,10 @@ public class ServidorHilo extends Thread {
         return cantidadAsientosPorReservar;
     }
 
-    private Set<String> obtenerListaAsientosPorComprar(DataInputStream in, DataOutputStream out, int cantidadAsientosPorReservar)
+    private ArrayList obtenerListaAsientosPorComprar(DataInputStream in, DataOutputStream out, int cantidadAsientosPorReservar)
             throws IOException{
-        Set<String> posicionesAsientos = new HashSet<>();
+
+        ArrayList<Object> posicionesAsientos = new ArrayList<>();
         out.writeUTF("\nAhora, introduce la posición de los asientos que deseas reservar.\n" +
                 "El formato a seguir es f-c (Ejemplo: 1-1).");
         for (int i = 0; i < cantidadAsientosPorReservar; i++) {
@@ -141,27 +138,15 @@ public class ServidorHilo extends Thread {
             }
             out.writeUTF("valida");
             p = in.readUTF();
+            transaccion.agregarAsiento(p);
             posicionesAsientos.add(p);
         }
+        transaccion.avanzarPaso();
         return posicionesAsientos;
     }
 
+
     public int getContadorClientes() {
         return contadorClientes;
-    }
-
-    private void replicarTransaccion(String transaccion) {
-        if (outRespaldo != null) {
-            try{
-                outRespaldo.writeUTF(transaccion);
-                System.out.println("Transaccion replicada: " + transaccion);
-            }catch (IOException e) {
-                System.err.println("Error al enviar la transaccion al servidor de replicas: " + e.getMessage());
-            }
-        }else {
-            System.out.println(
-                    "No se pudo replicar la transaccion. Conexión con el servidor de replicas no establecida."
-            );
-        }
     }
 }

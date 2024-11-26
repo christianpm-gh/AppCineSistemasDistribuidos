@@ -1,8 +1,5 @@
 package cliente;
 
-import controlador.Controlador;
-import servidor.Servidor;
-
 import java.io.*;
 import java.net.*;
 import java.util.InputMismatchException;
@@ -14,16 +11,45 @@ import java.util.Scanner;
 
 public class Cliente extends Thread {
 
-    private static final String SERVIDOR = "localhost";
-    private static final int PUERTO = 12345;
+    private static final String SERVIDOR_PRINCIPAL = "localhost";
+    private static final int PUERTO_PRINCIPAL = 12346;
+    private static final String SERVIDOR_RESPALDO = "localhost";
+    private static final int PUERTO_RESPALDO = 12347;
 
     public static void main(String[] args) {
+        boolean conectado = false;
+        Socket socket = null;
+        DataInputStream in = null;
+        DataOutputStream out = null;
 
-        try (Socket socket = new Socket(SERVIDOR, PUERTO);
-             DataInputStream in = new DataInputStream(socket.getInputStream());
-             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-             Scanner scanner = new Scanner(System.in)
-        ) {
+        while (!conectado) {
+            try {
+                // Intentar conectar al servidor principal
+                System.out.println("Intentando conectar al servidor principal...");
+                socket = new Socket(SERVIDOR_PRINCIPAL, PUERTO_PRINCIPAL);
+                conectado = true;
+                System.out.println("Conectado al servidor principal.");
+            } catch (IOException e) {
+                System.out.println("Servidor principal no disponible. Intentando con el respaldo...");
+                try {
+                    // Intentar conectar al servidor de respaldo
+                    socket = new Socket(SERVIDOR_RESPALDO, PUERTO_RESPALDO);
+                    conectado = true;
+                    System.out.println("Conectado al servidor de respaldo.");
+                } catch (IOException ex) {
+                    System.out.println("Ambos servidores están caídos. Reintentando en 5 segundos...");
+                    try {
+                        Thread.sleep(5000); // Espera antes de reintentar
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+            }
+        }
+
+        try {in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+            Scanner scanner = new Scanner(System.in);
+
             String confirmacionCompra;
             do {
                 System.out.println("\nConectado al servidor de cine 🎥🍿");
@@ -104,10 +130,13 @@ public class Cliente extends Thread {
             System.out.println(in.readUTF());
 
         } catch (IOException e) {
-            System.err.println("\nError al conectarse al servidor: " + e.getMessage());
-        }
-        finally {
-            System.out.println("\nConexión cerrada.");
+            System.out.println("Se perdió la conexión con el servidor. Reconexión en proceso...");
+            main(args); // Reiniciar el cliente
+        } finally {
+            try {
+                if (socket != null) socket.close();
+            } catch (IOException ignored) {
+            }
         }
     }
 }

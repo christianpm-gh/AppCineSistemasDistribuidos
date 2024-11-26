@@ -5,6 +5,7 @@ import entidades.Funcion;
 import entidades.Pelicula;
 import entidades.Sala;
 
+import java.io.*;
 import java.util.*;
 
 /**
@@ -15,6 +16,26 @@ public class Controlador {
 
     public static final int MAX_FILAS = 5;
     public static final int MAX_COLUMNAS = 5;
+
+    public static void serializarSala(Sala sala, String nombreArchivo) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(nombreArchivo))) {
+            oos.writeObject(sala);
+            System.out.println("Sala serializada exitosamente en: " + nombreArchivo);
+        } catch (IOException e) {
+            System.err.println("Error al serializar la sala: " + e.getMessage());
+        }
+    }
+
+    public static Sala deserializarSala(String nombreArchivo) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(nombreArchivo))) {
+            Sala sala = (Sala) ois.readObject();
+            System.out.println("Sala deserializada exitosamente desde: " + nombreArchivo);
+            return sala;
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error al deserializar la sala: " + e.getMessage());
+            return null;
+        }
+    }
 
     public static String mostrarDisposicionAsientos(int eleccionFuncion, Sala sala1) {
 

@@ -1,12 +1,14 @@
 package entidades;
 
 
+import java.io.Serializable;
+
 /**
  * @author Christian Morga
  */
 
 
-public class Asiento{
+public class Asiento implements Serializable {
     private boolean ocupado;
     private String idTransaccion;
 

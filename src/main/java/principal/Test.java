@@ -1,12 +1,7 @@
 package principal;
 
 import controlador.Controlador;
-import entidades.Funcion;
-import entidades.Pelicula;
 import entidades.Sala;
-import servidor.Servidor;
-
-import java.util.HashMap;
 
 public class Test {
     public static void main(String[] args) {

@@ -2,6 +2,7 @@ package entidades;
 
 import controlador.Controlador;
 
+import java.io.Serializable;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Christian Morga
  */
 
-public class Funcion {
+public class Funcion implements Serializable {
     private LocalTime horaInicio;
     private LocalTime horaFin;
     private Pelicula pelicula;
